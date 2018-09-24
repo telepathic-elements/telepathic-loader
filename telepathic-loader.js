@@ -18,29 +18,45 @@ export default class TelepathicLoader{
                     //console.log(`${tagName} : ${className} is ${fileName}`);
                     //console.log(`${tagName} is unregistered`);
                     //Try to instantiate
+                    
                     let path = window.location.pathname.split('/');
                     path.pop();
                     path = path.join('/');
                     let jsloc = `${path}/${tagName}/${jsFileName}`;
                     let htmlLoc = `${path}/${tagName}/${htmlFileName}`;
-                    window[className] = htmlLoc;
                     window[tagName] = className;
+                    window[className] = htmlLoc;
+                    console.log(`Expecting template at ${window[className]}`);
+                   
                     console.log(`importing ${jsloc}`);
                     let module = await import(jsloc);
-                   
-                    //console.log(tagName+" module is ",module);
-                    try{
-                        window.customElements.define(tagName,module.default);
-                    }catch(err){
-                        console.error(`${tagName} : ${err}`);
-                    }
-                    //import {className} from ;
-                    //window.customElements.define(tagName,this[className]);
+                    console.log(tagName+" module is ",module);
+                    TelepathicLoader.delayLoad(htmlLoc,tagName,className,module,1);
+
                 }else{
                     console.log(`${tagName} already loaded, skipping!`);
                 }
             }
         });
+    }
+
+    static delayLoad(htmlLoc,tagName,className,module,delay){
+        setTimeout(()=>{
+            if(!window.customElements.get(tagName)){
+                if(window[className]){
+                    try{
+                        window.customElements.define(tagName,module.default);
+                    }catch(err){
+                        console.error(`${tagName} : ${err}`);
+                        TelepathicLoader.delayLoad(htmlLoc,tagName,className,module,delay +1000);
+                    }
+                }else{
+                    window[className] = htmlLoc;
+                    console.error("Template location missing for ",className);
+                    TelepathicLoader.delayLoad(htmlLoc,tag,className,module,delay + 1000);
+                }
+            }
+        },delay);
     }
 }
 window.TelepathicLoader = TelepathicLoader;  
