@@ -28,9 +28,21 @@ export default class TelepathicLoader{
                     window[tagName] = className;
                     window[className] = htmlLoc;
                     console.log(`Expecting template at ${window[className]}`);
-                   
-                    console.log(`importing ${jsloc}`);
-                    let module = await importModule(jsloc);
+                    
+                    let module;
+                    try{
+                        console.log(`importing ${jsloc}`);
+                        module = await importModule(jsloc);
+                    }catch(err){
+                        //module is probably remote
+                        path = 'https://telepathic-elements.github.io';
+                        jsloc = `${path}/${tagName}/${jsFileName}`;
+                        let htmlLoc = `${path}/${tagName}/${htmlFileName}`;
+                        window[tagName] = className;
+                        window[className] = htmlLoc;
+                        console.log(`importing ${jsloc}`);
+                        module = await importModule(jsloc);
+                    }
                     console.log(tagName+" module is ",module);
                     TelepathicLoader.delayLoad(htmlLoc,tagName,className,module,1);
 
