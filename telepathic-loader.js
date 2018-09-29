@@ -21,11 +21,11 @@ export default class TelepathicLoader{
                     path.pop();
                     path = path.join('/');
                     window[className] = path;
-                    let jsloc = `${path}/${tagName}/${jsFileName}`;
+                    let jsLoc = `${path}/${tagName}/${jsFileName}`;
                     let module;
                     try{
-                        console.log(`importing ${jsloc}`);
-                        module = await importModule(jsloc);
+                        console.log(`importing ${jsLoc}`);
+                        module = await importModule(jsLoc);
                     }catch(err){
                         //module is probably remote
                         path = 'https://telepathic-elements.github.io';
