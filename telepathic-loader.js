@@ -1,51 +1,45 @@
+import { importModule } from "https://uupaa.github.io/dynamic-import-polyfill/importModule.js";
 //IIFE to try and load all *-element - class name must match SomethingElement while tag must match something-element
 export default class TelepathicLoader{
     static async Load(dom){
         let nodeList = dom.querySelectorAll('*');
-        nodeList.forEach(async (element)=>{
+        for(let element of nodeList){
             if(element.tagName.includes('-ELEMENT')){
                 let tagName = element.tagName.toLowerCase();
-                let jsFileName = `${tagName}.js`;
-                let mdFileName = `${tagName}.md`;
-                let htmlFileName = `${tagName}.html`;
-                let classParts = tagName.split('-');
-                let className = "";
-                classParts.forEach((part)=>{
-                    className += part.charAt(0).toUpperCase() + part.slice(1);
-                });
-    
                 //First see if there is already something in the custom element registry
                 if(!window.customElements.get(tagName)){
-                    //console.log(`${tagName} : ${className} is ${fileName}`);
-                    //console.log(`${tagName} is unregistered`);
-                    //Try to instantiate
+                    let jsFileName = `${tagName}.js`;
+                    
+                    let classParts = tagName.split('-');
+                    let className = "";
+                    for(let part of classParts){
+                        className += part.charAt(0).toUpperCase() + part.slice(1);
+                    }
+                   
+                    window[tagName] = className;
                     let path = window.location.pathname.split('/');
                     path.pop();
                     path = path.join('/');
-                    let jsloc = `${path}/${tagName}/${jsFileName}`;
-                    let mdLoc = `${path}/${tagName}/${mdFileName}`;
-                    let htmlLoc = `${path}/${tagName}/${htmlFileName}`;
-                    window[className] = {
-                        html : htmlLoc,
-                        md : mdLoc 
-                    };
-                    console.log(`Expecting template at ${JSON.stringify(window[className])}`);
-                    window[tagName] = className;
-                    console.log(`importing ${jsloc}`);
-                    let module = await import(jsloc);
-                    console.log(tagName+" module is ",module);
+                    window[className] = path;
+                    let jsLoc = `${path}/${tagName}/${jsFileName}`;
+                    let module;
                     try{
-                        window.customElements.define(tagName,module.default);
+                        console.log(`importing ${jsLoc}`);
+                        module = await importModule(jsLoc);
                     }catch(err){
-                        console.error(`${tagName} : ${err}`);
+                        //module is probably remote
+                        path = 'https://telepathic-elements.github.io';
+                        jsLoc = `${path}/${tagName}/${jsFileName}`;
+                        console.log(`importing ${jsLoc}`);
+                        module = await importModule(jsLoc);
                     }
-                    //import {className} from ;
-                    //window.customElements.define(tagName,this[className]);
+                    console.log(tagName+" module is ",module);
+                    await window.customElements.define(tagName,module.default);
                 }else{
                     console.log(`${tagName} already loaded, skipping!`);
                 }
             }
-        });
+        }
     }
 }
 window.TelepathicLoader = TelepathicLoader;  
