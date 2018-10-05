@@ -6,6 +6,7 @@ export default class TelepathicLoader{
             if(element.tagName.includes('-ELEMENT')){
                 let tagName = element.tagName.toLowerCase();
                 let jsFileName = `${tagName}.js`;
+                let mdFileName = `${tagName}.md`;
                 let htmlFileName = `${tagName}.html`;
                 let classParts = tagName.split('-');
                 let className = "";
@@ -22,13 +23,17 @@ export default class TelepathicLoader{
                     path.pop();
                     path = path.join('/');
                     let jsloc = `${path}/${tagName}/${jsFileName}`;
+                    let mdLoc = `${path}/${tagName}/${mdFileName}`;
                     let htmlLoc = `${path}/${tagName}/${htmlFileName}`;
-                    window[className] = htmlLoc;
+                    window[className] = {
+                        html : htmlLoc,
+                        md : mdLoc 
+                    };
+                    console.log(`Expecting template at ${JSON.stringify(window[className])}`);
                     window[tagName] = className;
                     console.log(`importing ${jsloc}`);
                     let module = await import(jsloc);
-                   
-                    //console.log(tagName+" module is ",module);
+                    console.log(tagName+" module is ",module);
                     try{
                         window.customElements.define(tagName,module.default);
                     }catch(err){
