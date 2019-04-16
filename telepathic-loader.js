@@ -1,4 +1,4 @@
-import { importModule } from "https://uupaa.github.io/dynamic-import-polyfill/importModule.js";
+import { importModule } from "./importModule.js";
 //IIFE to try and load all *-element - class name must match SomethingElement while tag must match something-element
 export default class TelepathicLoader{
     static async Load(dom){
